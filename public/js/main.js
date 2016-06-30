@@ -36,41 +36,114 @@ $(function () {
     --------------------------
      */
 
-    //Load Day Buttons:
-    $.get('api/days', function(dayArray){
-        dayArray.forEach(function(day){
-            var $newDayButton = createDayButton(day.number);
-            $addDayButton.before($newDayButton);
+    ////Render Day Buttons:
+    var RenderDayButtons = function(){
+        $addDayButton.siblings().remove();
+        $.get('api/days', function(dayArray){
+            dayArray.forEach(function(day){
+                var $newDayButton = createDayButton(day.number);
+                $addDayButton.before($newDayButton);
+            })
+            //Select Current-Day
         })
-    })
-    .fail(console.error.bind(console));
+        .fail(console.error.bind(console));
+    } 
+    ////Initialize:
+    RenderDayButtons();  
+    ////
 
-    
+    var RenderDayInfo = function(){
+        $.get('/days', function(allDays){
+
+        })
+        .fail(console.error.bind(console));
+    }
 
 
+    ////Remove Day Button:
+    $removeDayButton.on('click', function () {
+        $.ajax({
+            url: '/api/days/'+currentDayNum,
+            type: 'DELETE',
+            success: function(result) {
+                RenderDayButtons();
+            }
+        })
+        .fail(console.error.bind(console));
+    });
+    ////
+
+    ////Add Day Button:
+    $addDayButton.on('click', function () {
+        var newDayNum = parseInt($addDayButton.prev().text())+1;
+        console.log(newDayNum);
+        $.post('/api/days/'+newDayNum, function (data) {
+            console.log('POST response data', data);
+            RenderDayButtons(); 
+        })
+        .fail( console.error.bind(console) );
+    });
+    ////
+
+    // $addDayButton.on('click', function () {
+    //     var newDayNum = days.length + 1;
+    //     var $newDayButton = createDayButton(newDayNum);
+    //     days.push([]);
+    //     $addDayButton.before($newDayButton);
+    //     switchDay(newDayNum);
+    // });
+
+
+    //// Add Item To Day:
     $addItemButton.on('click', function () {
-
         var $this = $(this);
         var $select = $this.siblings('select');
         var sectionName = $select.attr('data-type');
         var itemId = parseInt($select.val(), 10);
         var $list = $listGroups[sectionName];
-        var collection = collections[sectionName];
-        var item = findInCollection(collection, itemId);
+        //Go get the item to be added from the database.
+        console.log(sectionName, itemId);
+        $.get('/api/'+sectionName+"/"+itemId, function(item){
+            console.log(item);
 
-        var marker = drawMarker(map, sectionName, item.place.location);
+            $list.append(create$item(item));
 
-        $list.append(create$item(item));
+            $.post('/api/days/'+currentDayNum+'/'+sectionName+"/"+itemId, function(data){
+                console.log("added to day!");
+            })
+            .fail( console.error.bind(console) );
+        })
+        .fail( console.error.bind(console) );
 
-        days[currentDayNum - 1].push({
-            item: item,
-            marker: marker,
-            type: sectionName
-        });
-
-        mapFit();
+        //var marker = drawMarker(map, sectionName, item.place.location);
 
     });
+    ////
+
+
+    // $addItemButton.on('click', function () {
+
+    //     var $this = $(this);
+    //     var $select = $this.siblings('select');
+    //     var sectionName = $select.attr('data-type');
+    //     var itemId = parseInt($select.val(), 10);
+    //     var $list = $listGroups[sectionName];
+    //     var collection = collections[sectionName];
+    //     var item = findInCollection(collection, itemId);
+
+    //     var marker = drawMarker(map, sectionName, item.place.location);
+
+    //     $list.append(create$item(item));
+
+    //     days[currentDayNum - 1].push({
+    //         item: item,
+    //         marker: marker,
+    //         type: sectionName
+    //     });
+
+    //     mapFit();
+
+    // });
 
     $itinerary.on('click', 'button.remove', function () {
 
@@ -88,32 +161,25 @@ $(function () {
 
     });
 
-    $addDayButton.on('click', function () {
-        var newDayNum = days.length + 1;
-        var $newDayButton = createDayButton(newDayNum);
-        days.push([]);
-        $addDayButton.before($newDayButton);
-        switchDay(newDayNum);
-    });
 
     $dayButtonList.on('click', '.day-btn', function () {
         var dayNumberFromButton = parseInt($(this).text(), 10);
         switchDay(dayNumberFromButton);
     });
 
-    $removeDayButton.on('click', function () {
+    // $removeDayButton.on('click', function () {
 
-        wipeDay();
-        days.splice(currentDayNum - 1, 1);
+    //     wipeDay();
+    //     days.splice(currentDayNum - 1, 1);
 
-        if (days.length === 0) {
-            days.push([]);
-        }
+    //     if (days.length === 0) {
+    //         days.push([]);
+    //     }
 
-        reRenderDayButtons();
-        switchDay(1);
+    //     reRenderDayButtons();
+    //     switchDay(1);
 
-    });
+    // });
 
 
     /*
@@ -183,17 +249,17 @@ $(function () {
 
     }
 
-    function reRenderDayButtons() {
+    // function reRenderDayButtons() {
 
-        var numberOfDays = days.length;
+    //     var numberOfDays = days.length;
 
-        $dayButtonList.children('button').not($addDayButton).remove();
+    //     $dayButtonList.children('button').not($addDayButton).remove();
 
-        for (var i = 0; i < numberOfDays; i++) {
-            $addDayButton.before(createDayButton(i + 1));
-        }
+    //     for (var i = 0; i < numberOfDays; i++) {
+    //         $addDayButton.before(createDayButton(i + 1));
+    //     }
 
-    }
+    // }
 
     function mapFit() {
 

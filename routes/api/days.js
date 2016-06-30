@@ -18,19 +18,47 @@ router.get('/:id', function(req,res,next){
 router.get('/', function(req,res,next){
 	Day.findAll({order:[['number', 'ASC']]})
 	.then(function(resultDays){
+		Promise.each(resultDays, function(day){
+			promiseForHotel = day.getHotel();
+			promiseForRestaurants = day.getRestaurants();
+			promiseForActivities = day.getActivities();
+			Promise.all([promiseForHotel, promiseForRestaurants, promiseForActivities])
+			.spread(function(hotel, restaurants, activities){
+				console.log("hotel: "+ hotel);
+				console.log("restaurants: "+restaurants); ////ADD functionality that returns these
+				console.log("activities: "+activities);
+			})
+		})
+		return resultDays
+	})
+	.then(function(resultDays){
 		res.send(resultDays);
+	})
+	.catch(next);
+});
+
+//Add a restaurant to Day
+router.post('/:number/restaurant/:id', function(req,res,next){
+	var dayNumber = parseInt(req.params.number);
+	var id = parseInt(req.params.id);
+	Day.findOne({where: {number: dayNumber}})
+	.then(function(day){
+		day.addRestaurant(id)
+		.then(function(result){
+			res.send(result);
+		})
+		.catch(next);
 	})
 	.catch(next);
 })
 
 //Add a restaurant to Day
-router.post('./:id/restaurants', function(req,res,next){
-	Day.findOne({where: {id:req.params.id}})
+router.post('/:number/activity/:id', function(req,res,next){
+	var dayNumber = parseInt(req.params.number);
+	var id = parseInt(req.params.id);
+	Day.findOne({where: {number: dayNumber}})
 	.then(function(day){
-		if (day.getRestaurants.length > 2){
-			return res.send("Cannot Add!");
-		}
-		day.addRestaurant(req.body)
+		day.addActivity(id)
 		.then(function(result){
 			res.send(result);
 		})
@@ -40,13 +68,14 @@ router.post('./:id/restaurants', function(req,res,next){
 })
 
 //Add a Hotel to Day
-router.post('./:id/hotels', function(req,res,next){
-	Day.findOne({where: {id:req.params.id}})
+router.post('/:number/hotel/:id', function(req,res,next){
+	var dayNumber = parseInt(req.params.number);
+	Day.findOne({where: { number: dayNumber} })
 	.then(function(day){
 		if (day.hotelId){
 			return res.send("Cannot Add!");
 		}
-		day.hotelId = (req.body.id);
+		day.setHotel(req.params.id);
 		res.send(day);
 	})
 	.catch(next);
