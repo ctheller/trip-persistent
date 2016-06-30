@@ -3,10 +3,13 @@ var router = express.Router();
 var Hotel = require('../../models/hotel');
 var Restaurant = require('../../models/restaurant');
 var Activity = require('../../models/activity');
+var Place = require('../../models/place');
 var Promise = require('bluebird');
 
 router.get("/hotels", function(req,res,next){
-	Hotel.findAll()
+	Hotel.findAll({
+        include: [Place]
+    })
 	.then(function(hotels){
 		res.send(hotels);
 	})
@@ -14,7 +17,9 @@ router.get("/hotels", function(req,res,next){
 })
 
 router.get("/restaurants", function(req,res,next){
-	Restaurant.findAll()
+	Restaurant.findAll({
+        include: [Place]
+    })
 	.then(function(hotels){
 		res.send(hotels);
 	})
@@ -22,12 +27,16 @@ router.get("/restaurants", function(req,res,next){
 })
 
 router.get("/activities", function(req,res,next){
-	Activity.findAll()
+	Activity.findAll({
+        include: [Place]
+    })
 	.then(function(hotels){
 		res.send(hotels);
 	})
 	.catch(next);
 })
+
+router.use('/days', require('./days'));
 
 module.exports = router;
 

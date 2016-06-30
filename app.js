@@ -25,7 +25,7 @@ app.use('/jquery', express.static(__dirname + '/node_modules/jquery/dist'));
 app.use(express.static(__dirname + '/public'));
 
 // serve dynamic routes
-app.use('/api', require("./routes/api/attractions"));
+app.use('/api/', require("./routes/api/attractions"));
 
 app.use(require('./routes'));
 
