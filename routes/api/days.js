@@ -5,11 +5,18 @@ var Restaurant = require('../../models/restaurant');
 var Day = require('../../models/day');
 var Promise = require('bluebird');
 
-//Return selected Day
-router.get('/:id', function(req,res,next){
-	Day.findAll({where: {id: req.params.id}})
-	.then(function(resultDays){
-		res.send(resultDays);
+//Return selected Day with all attractions
+router.get('/:number', function(req,res,next){
+	Day.findOne({where: {number: req.params.number}})
+	.then(function(currentDay){
+		promiseForHotel = currentDay.getHotel();
+		promiseForRestaurants = currentDay.getRestaurants();
+		promiseForActivities = currentDay.getActivities();
+		Promise.all([promiseForHotel, promiseForRestaurants, promiseForActivities])
+		.spread(function(hotel, restaurants, activities){
+				res.send({day: currentDay, hotel: hotel, restaurants: restaurants, activities: activities});
+		})
+		.catch(next);
 	})
 	.catch(next);
 })
@@ -17,20 +24,6 @@ router.get('/:id', function(req,res,next){
 //Return all Days
 router.get('/', function(req,res,next){
 	Day.findAll({order:[['number', 'ASC']]})
-	.then(function(resultDays){
-		Promise.each(resultDays, function(day){
-			promiseForHotel = day.getHotel();
-			promiseForRestaurants = day.getRestaurants();
-			promiseForActivities = day.getActivities();
-			Promise.all([promiseForHotel, promiseForRestaurants, promiseForActivities])
-			.spread(function(hotel, restaurants, activities){
-				console.log("hotel: "+ hotel);
-				console.log("restaurants: "+restaurants); ////ADD functionality that returns these
-				console.log("activities: "+activities);
-			})
-		})
-		return resultDays
-	})
 	.then(function(resultDays){
 		res.send(resultDays);
 	})

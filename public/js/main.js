@@ -24,9 +24,7 @@ $(function () {
     var $removeDayButton = $('#day-title').children('button');
     var $dayButtonList = $('.day-buttons');
 
-    var days = [
-        []
-    ];
+    var currentDay;
 
     var currentDayNum = 1;
 
@@ -35,6 +33,9 @@ $(function () {
     END VARIABLE DECLARATIONS
     --------------------------
      */
+
+
+    //
 
     ////Render Day Buttons:
     var RenderDayButtons = function(){
@@ -51,13 +52,6 @@ $(function () {
     ////Initialize:
     RenderDayButtons();  
     ////
-
-    var RenderDayInfo = function(){
-        $.get('/days', function(allDays){
-
-        })
-        .fail(console.error.bind(console));
-    }
 
 
     ////Remove Day Button:
@@ -216,22 +210,53 @@ $(function () {
         mapFit();
     }
 
-    function renderDay() {
-
-        var currentDay = days[currentDayNum - 1];
-
+    ////RenderDayInfo:
+    var RenderDay = function(num){
         $dayButtonList
-            .children('button')
-            .eq(currentDayNum - 1)
-            .addClass('current-day');
+                .children('button')
+                .eq(currentDayNum - 1)
+                .addClass('current-day');
+        $.get('/api/days/'+num, function(data){
+            if (data.hotel) {
+                $listGroups.hotel.append(create$item(data.hotel))
+            }
+            if (data.restaurants) {
+                data.restaurants.forEach(function(restaurant){
+                    $listGroups.restaurant.append(create$item(restaurant))
 
-        currentDay.forEach(function (attraction) {
-            var $listToAddTo = $listGroups[attraction.type];
-            $listToAddTo.append(create$item(attraction.item));
-            attraction.marker.setMap(map);
-        });
+                })
+            }
+            if (data.activities) {
+                data.activities.forEach(function(activity){
+                    $listGroups.activity.append(create$item(activity))
 
+                })
+            }
+            console.log(data.hotel);
+        })
+        .fail(console.error.bind(console));
     }
+
+    RenderDay(currentDayNum);
+    ////
+
+
+    // function renderDay() {
+
+    //     var currentDay = days[currentDayNum - 1];
+
+    //     $dayButtonList
+    //         .children('button')
+    //         .eq(currentDayNum - 1)
+    //         .addClass('current-day');
+
+    //     currentDay.forEach(function (attraction) {
+    //         var $listToAddTo = $listGroups[attraction.type];
+    //         $listToAddTo.append(create$item(attraction.item));
+    //         attraction.marker.setMap(map);
+    //     });
+
+    // }
 
     function wipeDay() {
 
