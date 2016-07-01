@@ -34,8 +34,9 @@ $(function () {
     --------------------------
      */
 
+     ////
 
-    //
+    ////
 
     ////Render Day Buttons:
     var RenderDayButtons = function(){
@@ -205,16 +206,16 @@ $(function () {
     function switchDay(dayNum) {
         wipeDay();
         currentDayNum = dayNum;
-        renderDay();
+        renderDay(dayNum);
         $dayTitle.text('Day ' + dayNum);
         mapFit();
     }
 
     ////RenderDayInfo:
-    var RenderDay = function(num){
+    var renderDay = function(num){
         $dayButtonList
                 .children('button')
-                .eq(currentDayNum - 1)
+                .eq(currentDayNum-1)
                 .addClass('current-day');
         $.get('/api/days/'+num, function(data){
             if (data.hotel) {
@@ -237,7 +238,7 @@ $(function () {
         .fail(console.error.bind(console));
     }
 
-    RenderDay(currentDayNum);
+    renderDay(currentDayNum);
     ////
 
 
@@ -266,12 +267,6 @@ $(function () {
            $listGroups[key].empty();
         });
 
-        if (days[currentDayNum - 1]) {
-            days[currentDayNum - 1].forEach(function (attraction) {
-                attraction.marker.setMap(null);
-            });
-        }
-
     }
 
     // function reRenderDayButtons() {
@@ -288,14 +283,14 @@ $(function () {
 
     function mapFit() {
 
-        var currentDay = days[currentDayNum - 1];
-        var bounds = new google.maps.LatLngBounds();
+        // var currentDay = currentDay.day;
+        // var bounds = new google.maps.LatLngBounds();
 
-        currentDay.forEach(function (attraction) {
-            bounds.extend(attraction.marker.position);
-        });
+        // currentDay.forEach(function (attraction) {
+        //     bounds.extend(attraction.marker.position);
+        // });
 
-        map.fitBounds(bounds);
+        // map.fitBounds(bounds);
 
     }
 
