@@ -145,14 +145,50 @@ $(function () {
         var $this = $(this);
         var $item = $this.parent();
         var itemName = $item.children('span').text();
-        var day = days[currentDayNum - 1];
-        var indexOfItemOnDay = findIndexOnDay(day, itemName);
-        var itemOnDay = day.splice(indexOfItemOnDay, 1)[0];
+        currentDay.restaurants.forEach(function(restaurant){
+            if (restaurant.name === itemName) {
+                $.ajax({
+                    url: '/api/days/'+currentDayNum+'/restaurant/'+restaurant.id,
+                    type: 'DELETE',
+                    success: function(result) {
+                        console.log("deleted");
+                    }
+                })
+                .fail(console.error.bind(console));  
+            }
+        })
+        currentDay.activities.forEach(function(activity){
+            if (activity.name === itemName) {
+                $.ajax({
+                    url: '/api/days/'+currentDayNum+'/activity/'+activity.id,
+                    type: 'DELETE',
+                    success: function(result) {
+                        console.log("deleted");
+                    }
+                })
+                .fail(console.error.bind(console));  
+            }
+        })
 
-        itemOnDay.marker.setMap(null);
-        $item.remove();
+        if (currentDay.hotel && currentDay.hotel.name === itemName) {
+            $.ajax({
+                url: '/api/days/'+currentDayNum+'/hotel',
+                type: 'DELETE',
+                success: function(result) {
+                    console.log("deleted");
+                }
+            })
+            .fail(console.error.bind(console));  
+        }
 
-        mapFit();
+        renderDay(currentDayNum);
+
+
+
+        // itemOnDay.marker.setMap(null);
+        // $item.remove();
+
+        // mapFit();
 
     });
 
@@ -210,9 +246,12 @@ $(function () {
         $dayTitle.text('Day ' + dayNum);
         mapFit();
     }
+    ////initialize
+    // switchDay(1);
+    ////
 
     ////RenderDayInfo:
-    var renderDay = function(num){
+    var renderDay = function(num){        
         $dayButtonList
                 .children('button')
                 .eq(currentDayNum-1)
@@ -230,15 +269,15 @@ $(function () {
             if (data.activities) {
                 data.activities.forEach(function(activity){
                     $listGroups.activity.append(create$item(activity))
-
                 })
             }
-            console.log(data.hotel);
+            currentDay = data;
+            console.log(currentDay);
         })
         .fail(console.error.bind(console));
     }
 
-    renderDay(currentDayNum);
+    switchDay(currentDayNum);
     ////
 
 

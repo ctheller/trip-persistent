@@ -45,7 +45,7 @@ router.post('/:number/restaurant/:id', function(req,res,next){
 	.catch(next);
 })
 
-//Add a restaurant to Day
+//Add an activity to Day
 router.post('/:number/activity/:id', function(req,res,next){
 	var dayNumber = parseInt(req.params.number);
 	var id = parseInt(req.params.id);
@@ -74,6 +74,7 @@ router.post('/:number/hotel/:id', function(req,res,next){
 	.catch(next);
 })
 
+
 //Create a Day
 router.post("/:number", function(req,res,next){
 	Day.create({number: req.params.number})
@@ -82,6 +83,55 @@ router.post("/:number", function(req,res,next){
 	})
 	.catch(next);
 })
+
+//DELETES:
+
+
+//Remove a restaurant from Day (should work??)
+router.delete('/:number/restaurant/:id', function(req,res,next){
+	var dayNumber = parseInt(req.params.number);
+	var id = parseInt(req.params.id);
+	Day.findOne({where: {number: dayNumber}})
+	.then(function(day){
+		day.removeRestaurant(id)
+		.then(function(result){
+			res.status(200);
+		})
+		.catch(next);
+	})
+	.catch(next);
+})
+
+//Remove an activity from Day
+router.delete('/:number/activity/:id', function(req,res,next){
+	var dayNumber = parseInt(req.params.number);
+	var id = parseInt(req.params.id);
+	Day.findOne({where: {number: dayNumber}})
+	.then(function(day){
+		day.removeActivity(id)
+		.then(function(result){
+			res.status(200);
+		})
+		.catch(next);
+	})
+	.catch(next);
+})
+
+//Remove a Hotel from Day
+router.delete('/:number/hotel', function(req,res,next){
+	var dayNumber = parseInt(req.params.number);
+	Day.findOne({where: { number: dayNumber} })
+	.then(function(day){
+		day.setHotel(null)
+		.then(function(result){
+			res.status(200);
+		})
+		.catch(next);
+	})
+	.catch(next);
+})
+
+
 
 //Delete a Day
 router.delete("/:number", function(req,res,next){
